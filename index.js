@@ -9,9 +9,23 @@ const router = new Router();
 let db;
 
 MongoClient.connect(process.env.MONGODB_URI)
-  .then(client => {
+  .then(async client => {
     db = client.db('messaging-app');
     console.log('Connected to MongoDB');
+    
+    // Create collections if they don't exist
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map(c => c.name);
+    
+    if (!collectionNames.includes('users')) {
+      await db.createCollection('users');
+      console.log('Created users collection');
+    }
+    
+    if (!collectionNames.includes('messages')) {
+      await db.createCollection('messages');
+      console.log('Created messages collection');
+    }
   });
 
 app.use(bodyParser());

@@ -5,8 +5,6 @@ services:
     image: mongo:6
     container_name: mongodb-primary
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -19,19 +17,16 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile"
+    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28018"
     volumes:
       - mongodb_primary_data:/data/db
       - ./keyfile:/keyfile
-    networks:
-      - messaging-network
+    network_mode: "host"
 
   mongodb-secondary1:
     image: mongo:6
     container_name: mongodb-secondary1
     restart: unless-stopped
-    ports:
-      - "27018:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -44,21 +39,16 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile"
+    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28019"
     volumes:
       - mongodb_secondary1_data:/data/db
       - ./keyfile:/keyfile
-    depends_on:
-      - mongodb-primary
-    networks:
-      - messaging-network
+    network_mode: "host"
 
   mongodb-secondary2:
     image: mongo:6
     container_name: mongodb-secondary2
     restart: unless-stopped
-    ports:
-      - "27019:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -71,28 +61,12 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile"
+    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28020"
     volumes:
       - mongodb_secondary2_data:/data/db
       - ./keyfile:/keyfile
-    depends_on:
-      - mongodb-primary
-    networks:
-      - messaging-network
+    network_mode: "host"
 
-  mongodb-setup:
-    image: mongo:6
-    container_name: mongodb-setup
-    depends_on:
-      - mongodb-primary
-      - mongodb-secondary1
-      - mongodb-secondary2
-    restart: on-failure
-    entrypoint: ["/bin/bash", "/setup_mongo.sh"]
-    volumes:
-      - ./setup_mongo.sh:/setup_mongo.sh
-    networks:
-      - messaging-network
 
 volumes:
   mongodb_primary_data:
@@ -102,3 +76,4 @@ volumes:
 networks:
   messaging-network:
     driver: bridge
+
