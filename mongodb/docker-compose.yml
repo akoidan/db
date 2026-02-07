@@ -3,7 +3,6 @@ version: '3.8'
 services:
   mongodb-rs0-p:
     image: mongo:6
-    container_name: mongodb-rs0-p
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -19,7 +18,7 @@ services:
         exec docker-entrypoint.sh $$@
     command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28018"
     volumes:
-      - mongodb_primary_data:/data/db
+      - mongodb-rs0-p:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
@@ -40,13 +39,12 @@ services:
         exec docker-entrypoint.sh $$@
     command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28019"
     volumes:
-      - mongodb_secondary1_data:/data/db
+      - mongodb-rs0-s1:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
   mongodb-rs0-s2:
     image: mongo:6
-    container_name: mongodb-secondary2
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -62,14 +60,13 @@ services:
         exec docker-entrypoint.sh $$@
     command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28020"
     volumes:
-      - mongodb_secondary2_data:/data/db
+      - mongodb-rs0-s2:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
 
   mongodb-rs1-p:
     image: mongo:6
-    container_name: mongodb-rs0-p
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -85,7 +82,7 @@ services:
         exec docker-entrypoint.sh $$@
     command: "mongod --bind_ip_all --replSet rs1 --keyFile /mongo_keyfile --port 28021"
     volumes:
-      - mongodb_primary_data:/data/db
+      - mongodb-rs1-p:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
@@ -106,13 +103,12 @@ services:
         exec docker-entrypoint.sh $$@
     command: "mongod --bind_ip_all --replSet rs1 --keyFile /mongo_keyfile --port 28022"
     volumes:
-      - mongodb_secondary1_data:/data/db
+      - mongodb-rs1-s1:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
   mongodb-rs1-s2:
     image: mongo:6
-    container_name: mongodb-secondary2
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -128,15 +124,18 @@ services:
         exec docker-entrypoint.sh $$@
     command: "mongod --bind_ip_all --replSet rs1 --keyFile /mongo_keyfile --port 28023"
     volumes:
-      - mongodb_secondary2_data:/data/db
+      - mongodb-rs1-s2:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
 
 volumes:
-  mongodb_primary_data:
-  mongodb_secondary1_data:
-  mongodb_secondary2_data:
+  mongodb-rs0-p:
+  mongodb-rs1-p:
+  mongodb-rs0-s1:
+  mongodb-rs0-s2:
+  mongodb-rs1-s1:
+  mongodb-rs1-s2:
 
 networks:
   messaging-network:
