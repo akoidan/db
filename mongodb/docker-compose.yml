@@ -16,7 +16,7 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28018"
+    command: "mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28018"
     volumes:
       - mongodb-rs0-p:/data/db
       - ./keyfile:/keyfile
@@ -37,7 +37,7 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28019"
+    command: "mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28019"
     volumes:
       - mongodb-rs0-s1:/data/db
       - ./keyfile:/keyfile
@@ -58,7 +58,7 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs0 --keyFile /mongo_keyfile --port 28020"
+    command: "mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28020"
     volumes:
       - mongodb-rs0-s2:/data/db
       - ./keyfile:/keyfile
@@ -80,7 +80,7 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs1 --keyFile /mongo_keyfile --port 28021"
+    command: "mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28021"
     volumes:
       - mongodb-rs1-p:/data/db
       - ./keyfile:/keyfile
@@ -101,7 +101,7 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs1 --keyFile /mongo_keyfile --port 28022"
+    command: "mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28022"
     volumes:
       - mongodb-rs1-s1:/data/db
       - ./keyfile:/keyfile
@@ -122,12 +122,81 @@ services:
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
         exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --replSet rs1 --keyFile /mongo_keyfile --port 28023"
+    command: "mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28023"
     volumes:
       - mongodb-rs1-s2:/data/db
       - ./keyfile:/keyfile
     network_mode: "host"
 
+  mongodb-cfg-1:
+    image: mongo:6
+    restart: unless-stopped
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp /keyfile /mongo_keyfile
+        chmod 400 /mongo_keyfile
+        chown 999:999 /mongo_keyfile
+        exec docker-entrypoint.sh $$@
+    command: "mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27030"
+    volumes:
+      - mongodb-cfg-1:/data/db
+      - ./keyfile:/keyfile
+    network_mode: "host"
+
+  mongodb-cfg-2:
+    image: mongo:6
+    restart: unless-stopped
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp /keyfile /mongo_keyfile
+        chmod 400 /mongo_keyfile
+        chown 999:999 /mongo_keyfile
+        exec docker-entrypoint.sh $$@
+    command: "mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27031"
+    volumes:
+      - mongodb-cfg-2:/data/db
+      - ./keyfile:/keyfile
+    network_mode: "host"
+
+  mongodb-cfg-3:
+    image: mongo:6
+    restart: unless-stopped
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp /keyfile /mongo_keyfile
+        chmod 400 /mongo_keyfile
+        chown 999:999 /mongo_keyfile
+        exec docker-entrypoint.sh $$@
+    command: "mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27032"
+    volumes:
+      - mongodb-cfg-3:/data/db
+      - ./keyfile:/keyfile
+    network_mode: "host"
+
+  mongos:
+    image: mongo:6
+    restart: unless-stopped
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp /keyfile /mongo_keyfile
+        chmod 400 /mongo_keyfile
+        chown 999:999 /mongo_keyfile
+        exec mongos \
+        --configdb cfgRS/localhost:27030,localhost:27031,localhost:27032 \
+        --keyFile /mongo_keyfile \
+        --bind_ip_all \
+        --port 27040
+    volumes:
+      - ./keyfile:/mongo_keyfile
+    network_mode: "host"
 
 volumes:
   mongodb-rs0-p:
@@ -136,6 +205,9 @@ volumes:
   mongodb-rs0-s2:
   mongodb-rs1-s1:
   mongodb-rs1-s2:
+  mongodb-cfg-1:
+  mongodb-cfg-2:
+  mongodb-cfg-3:
 
 networks:
   messaging-network:
