@@ -19,13 +19,20 @@ MongoClient.connect(process.env.MONGODB_URI)
     
     if (!collectionNames.includes('users')) {
       await db.createCollection('users');
+      await db.admin().command({
+        shardCollection: 'messaging-app.users', // full namespace
+        key: { _id: 1 }                        // shard key
+      });
       console.log('Created users collection');
     }
     
     if (!collectionNames.includes('messages')) {
       const messages = await db.createCollection('messages');
       console.log('Created messages collection');
-
+      await db.admin().command({
+        shardCollection: 'messaging-app.messages', // full namespace
+        key: { userId: 1 }                        // shard key
+      });
       await messages.createIndex('userId');
     }
   });

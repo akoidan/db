@@ -30,6 +30,7 @@ EXPLAIN Select * from ...
 ## Characteristics
  - Use when REALLY high throughtput (100k RPS writes). Write >> read. Predictable QUERIES from the POC. E.g. Activity feeds, messaging, event logging. Do not use when flex queries or consistency required.
  - Doesn't support transaction
+ - required huge denormalization (comparing to mongo for example, since no joins)
  - Wide column based storage (stores data in rows, BUT each rows has any amount of columns and rows are distributed)
  - CAP: AP (always available even when partition occurs. Not consistent, serves outdated data even if other nodes are not reachable or down)
  - CAP: Can be tuned to CP.!! Tunable consistency (each query can specify desired consistency. E.g. if you WRITE to database you can specify the flags: ONE(means available), QUARUM (majority), ALL)
@@ -54,6 +55,7 @@ Supports sharding out of the box. Uses [consistent hashing](https://en.wikipedia
 # MongoDB
 
 ## Characteristics
+- Eats memory like crazy if not limit it. WiredTiger (mongos storage engine) consumes 50% of all system meemory.
 - Stores data in documents (I can still consider row based if rows store complex data like objects and array with WiredTiger compressed documents BSON)
 - Document
 - Support transactions BUT in replicaset only. 
@@ -71,12 +73,13 @@ db.users.find().explain("executionStats")
 
 ## Replication
 Self healing
-Supported out of the box with replicaset. Automatically reelects primary Node. Automatically syncs. client driver specifies all nodes, if one node fail -automatically reconnects to another node w/o downtime. Only primary node support writes, but client driver resolves it automatically.
+Supported out of the box with replicaset. Automatically reelects primary Node. Automatically syncs. client driver specifies all nodes, if one node fail -automatically reconnects to another node w/o downtime. 
+Only primary node support writes, but client driver resolves it automatically.
+If all nodes go down, none would be able to go up (since it needs to connect to someone) So manually config is required
+
 
 ## Sharding
-Supports sharding out of the box
-
-
+Supports sharding out of the box. Requires mongos server + 3 config serverers (mongod) + shardede replicas.
 
 # Redis
 - Strings (set,get, incr, decr,append), List (lpush, rpush, lpop, rpop, lrange), Sets (add, delete, emember, union). HashMap (hset, hget, hincrby). Streams

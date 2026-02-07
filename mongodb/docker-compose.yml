@@ -15,8 +15,8 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28018"
+        mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28018 --wiredTigerCacheSizeGB 2
+
     volumes:
       - mongodb-rs0-p:/data/db
       - ./keyfile:/keyfile
@@ -36,8 +36,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28019"
+        mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28019 --wiredTigerCacheSizeGB 2
     volumes:
       - mongodb-rs0-s1:/data/db
       - ./keyfile:/keyfile
@@ -57,8 +56,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28020"
+        mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28020 --wiredTigerCacheSizeGB 2
     volumes:
       - mongodb-rs0-s2:/data/db
       - ./keyfile:/keyfile
@@ -79,8 +77,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28021"
+        mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28021 --wiredTigerCacheSizeGB 2
     volumes:
       - mongodb-rs1-p:/data/db
       - ./keyfile:/keyfile
@@ -100,8 +97,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28022"
+        mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28022 --wiredTigerCacheSizeGB 2
     volumes:
       - mongodb-rs1-s1:/data/db
       - ./keyfile:/keyfile
@@ -121,8 +117,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28023"
+        mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28023 --wiredTigerCacheSizeGB 2
     volumes:
       - mongodb-rs1-s2:/data/db
       - ./keyfile:/keyfile
@@ -138,8 +133,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27030"
+        mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27030
     volumes:
       - mongodb-cfg-1:/data/db
       - ./keyfile:/keyfile
@@ -155,8 +149,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27031"
+        mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27031
     volumes:
       - mongodb-cfg-2:/data/db
       - ./keyfile:/keyfile
@@ -172,8 +165,7 @@ services:
         cp /keyfile /mongo_keyfile
         chmod 400 /mongo_keyfile
         chown 999:999 /mongo_keyfile
-        exec docker-entrypoint.sh $$@
-    command: "mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27032"
+        mongod --configsvr --replSet cfgRS --keyFile /mongo_keyfile --bind_ip_all --port 27032
     volumes:
       - mongodb-cfg-3:/data/db
       - ./keyfile:/keyfile

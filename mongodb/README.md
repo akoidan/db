@@ -20,8 +20,6 @@ mongosh --host localhost:28018
 
 Execute:
 ```js
-use admin
-
 rs.initiate({
   _id: 'rs0',
   members: [
@@ -41,8 +39,6 @@ mongosh --host localhost:28021
 
 Execute:
 ```js
-use admin
-
 rs.initiate({
   _id: 'rs1',
   members: [
@@ -57,7 +53,7 @@ rs.initiate({
 # Config dbs
 
 ```bash
-mongosh --host localhost:28030
+mongosh --host localhost:27030
 ```
 
 
@@ -80,6 +76,24 @@ mongosh --port 27040
 ```js
 sh.addShard("rs0/localhost:28018,localhost:28019,localhost:28020")
 sh.addShard("rs1/localhost:28021,localhost:28022,localhost:28023")
+
+use admin
+
+db.createUser({
+  user: "admin",
+  pwd: "password",
+  roles: ["root"]
+})
+
+```
+
+
+```bash
+mongosh --port 27040 -u admin -p password --authenticationDatabase admin
+
+
+> sh.enableSharding('messaging-app')
+
 ```
 
 ```bash
