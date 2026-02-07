@@ -5,6 +5,8 @@
 - CAP: AC (Strong consistent. availability if Primary is reachable. On network partition connection returns errors)
 - SQL, performant join
 - ACID compliant (Atomicity, Consistency, Isolation, Durability)
+- a lot of extension like full text search (tsvector with preindexing)
+- geospacial support
 
 ## Replication
 Master slave. Master can accept read, write. Each database endpoint should be hardcoded in the client. No automatic failover on the client side. Slaves can automatically sync from master and support read. Especially in CQRS (Command Query Responsibility Segregation) pattern (where reads are separate)
@@ -76,6 +78,42 @@ Supports sharding out of the box
 
 
 
+# Redis
+- Strings (set,get, incr, decr,append), List (lpush, rpush, lpop, rpop, lrange), Sets (add, delete, emember, union). HashMap (hset, hget, hincrby). Streams
+- PUBSUB
+- Transactions (multi, exec, discard, watch) + lua
+- Lua Scripting
+- Geo 
+- Stream
+- Cache
+- Arythemtic operation
+- TTL (automatically delete entry after time). Can act like a distributed lock
 
+
+
+
+
+
+# Elastic search
+ - tokenizes the string . E.g. 2 strings "I love cats", "I love dogs". WIll hashmap e.g. "I" -> 1st, 2nd row. "love" -> 1,2. Cats -> 1. Dogs ->2
+ - has geospacial support
+
+
+
+# TIPS
+
+HAPPY PATH
+
+## CDC
+
+change data captures - PostgreSQL (primary DB) → Debezium captures WAL → Kafka topic → Worker reads topic → Updates Elasticsearch
+
+## Data approach
 SQL - is entity driven
 NOSQL - is query driven (storage is cheap, duplication is fine)
+
+## How to pick database?
+
+These are the qualities of the database that we need.
+These databases satisfity it... Most time debates on SQL vs NoSQL doesnt matter. E.g. DynamoDB can have ACID properties
+
