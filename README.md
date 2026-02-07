@@ -7,11 +7,12 @@
 - ACID compliant (Atomicity, Consistency, Isolation, Durability)
 - a lot of extension like full text search (tsvector with preindexing)
 - geospacial support
+- Typically handled at average up to 200-500 connections. Can be setup more but then CPU context switching slows it down, since there's not layer in front that persist connections. PgBouncer Is required to be set in front for connection pooler. Otherwise each connection = 1 process (not even thread)
 
 ## Replication
 Master slave. Master can accept read, write. Each database endpoint should be hardcoded in the client. No automatic failover on the client side. Slaves can automatically sync from master and support read. Especially in CQRS (Command Query Responsibility Segregation) pattern (where reads are separate)
 Really performant. 
-Typically handled at average up to 200-500 connections. Can be setup more but then CPU context switching slows it down, since there's not layer in front that persist connections.
+
 If faul tolerant required Patroni / repmgr / pg_auto_failover can be used. + etcd / Consul / ZooKeeper for leader election. Client should connect to HAProxy / PgBouncer. Managed solutions:
  - GCP automatic failover for readonly replices. if master dies GGWP. Up to 10 read replicas. Doesnt support load balancing. Should be done manually with proxy or on a client side.
  - AWS Auroa - the only solution that reelects master. up to 15 replicas. Supports load balancing
@@ -28,11 +29,11 @@ EXPLAIN Select * from ...
 # Cassandra
 
 ## Characteristics
+ - Wide column based storage (stores data in rows, BUT each rows has any amount of columns and rows are distributed)
  - Use when REALLY high throughtput (100k RPS writes). Write >> read. Predictable QUERIES from the POC (less flexible, dev-friendly). E.g. Activity feeds, messaging, event logging. Do not use when flex queries or consistency required.
  - Doesn't support transaction
  - required huge denormalization (comparing to mongo for example, since no joins)
- - Wide column based storage (stores data in rows, BUT each rows has any amount of columns and rows are distributed)
- - CAP: AP (always available even when partition occurs. Not consistent, serves outdated data even if other nodes are not reachable or down)
+ - CAP: AP (always available even when partition occurs. Not consistent, serves outdated data even if other nodes are not reachable or down) 
  - CAP: Can be tuned to CP.!! Tunable consistency (each query can specify desired consistency. E.g. if you WRITE to database you can specify the flags: ONE(means available), QUARUM (majority), ALL)
  - NoSQL
  - Scalable
@@ -42,7 +43,7 @@ EXPLAIN Select * from ...
 
 ## Replication
 Self healing
-No single master. Every node is equal, uses gossip protocol, every node communicates with a few more nodes and decides on consistency.
+No single master. So thus we get write conflicts. Thus no DATA integrity. Resolution - last write wins. Every node is equal, uses gossip protocol, every node communicates with a few more nodes and decides on consistency.
 
 ## Sharding
 Supports sharding out of the box. Uses [consistent hashing](https://en.wikipedia.org/wiki/Consistent_hashing). 
@@ -55,23 +56,26 @@ Supports sharding out of the box. Uses [consistent hashing](https://en.wikipedia
 # MongoDB
 
 ## Characteristics
+- Document 
+- B tree indexs
 - more developer friendly and flexible than cassandra.
-- Eats memory like crazy if not limit it. WiredTiger (mongos storage engine) consumes 50% of all system meemory.
+- Eats memory like crazy if not limit it. Outperforms psql in cases where data fully fit in RAM. WiredTiger (mongos storage engine) consumes 50% of all system memory. But compresses data in Disk (so disk consumption is lower to PSQL)
 - Stores data in documents (I can still consider row based if rows store complex data like objects and array with WiredTiger compressed documents BSON)
-- Document
-- Support transactions BUT in replicaset only. 
+- Support ACID transactions BUT in replicaset only. 
 - Scalable
 - supports data validation indatabase. Same as database constraint but optional. Also it supports it only withing this document (table), e.g. impossible to validate if foregn key exists (should be done at app level)
 - High Available
 - Fault Tolerant
 - Support joins (join will have cortege times if no Index attached, but still work)
+- Typically handled up to 1k-50k connections. But heavy on RAM
 
 ## Profiling
 
 ```mongosh
 db.users.find().explain("executionStats")
 ```
-
+Benchmarks: https://info.enterprisedb.com/rs/069-ALB-339/images/PostgreSQL_MongoDB_Benchmark-WhitepaperFinal.pdf
+Psql is a lot faster in most scenarios, even JSONB
 ## Replication
 Self healing
 Supported out of the box with replicaset. Automatically reelects primary Node. Automatically syncs. client driver specifies all nodes, if one node fail -automatically reconnects to another node w/o downtime. 
@@ -124,3 +128,21 @@ NOSQL - is query driven (storage is cheap, duplication is fine)
 These are the qualities of the database that we need.
 These databases satisfity it... Most time debates on SQL vs NoSQL doesnt matter. E.g. DynamoDB can have ACID properties
 
+
+
+QUESTDB
+MEMGRAPH
+TIMESCALE 
+COCKROACHDB
+SCylla
+
+
+# How to migrate from 1 DB set to another
+1) Define Application requirements:  P99 Read < 30ms, Peak throughput 150'000 ops/s. Read/write ratio: 55/45
+2) Define Infra requirements: Cloud provider, scalability, replication factor.
+3) Create POC with test data to verify new DB support it
+4) Dump data from the live server and validate concept on current data
+5) Add first stage support, write from API to both new PROD DB and old PROD DB
+6) Add migration script to migrate all data from from old db to new one
+7) Switch to read to new DB, while still writting to both old DB and new DB. IN case of any errors to be able to fall back
+8) Remove write to old db, and remove the old db as well 
