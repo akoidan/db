@@ -8,6 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import cassandraService from '#services/cassandra_service'
 
 router.get('/', async () => {
   return {
@@ -16,7 +17,16 @@ router.get('/', async () => {
 })
 
 router.get('/message', async () => {
-  return {
-    hello: 'world',
+  try {
+    const result = await cassandraService.execute('SELECT * FROM test_table LIMIT 1')
+    return {
+      message: 'Data retrieved successfully',
+      data: result.rows
+    }
+  } catch (error) {
+    return {
+      error: 'Failed to retrieve data',
+      details: error.message
+    }
   }
 })

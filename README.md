@@ -97,6 +97,8 @@ Supports sharding out of the box
 # Elastic search
  - tokenizes the string . E.g. 2 strings "I love cats", "I love dogs". WIll hashmap e.g. "I" -> 1st, 2nd row. "love" -> 1,2. Cats -> 1. Dogs ->2
  - has geospacial support
+ - AWS provides opensearch 
+ - support node query caching (lets say for 10k most search string it will cache result so they are blazingly fast)
 
 
 

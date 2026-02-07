@@ -6,7 +6,4 @@ const client = new cassandra.Client({
   keyspace: 'testks',
 });
 
-(async () => {
-  await client.connect()
-  console.log('Connected to Cassandra')
-})();
+export { client }
