@@ -9,9 +9,9 @@ async function main() {
     const db = client.db('messaging-app');
     const users = db.collection('users');
 
-    const bulkSize = 10000; // number of docs per batch
+    const bulkSize = 1_000; // number of docs per batch
     const docSize = 10240; // ~1KB per doc
-    const totalDocs = 900_000; // roughly 70MB of data
+    const totalDocs = 90_000_000; // roughly 70MB of data
 
     console.log('Inserting users...');
 
@@ -20,9 +20,9 @@ async function main() {
       for (let j = 0; j < bulkSize; j++) {
         const id = i + j;
         batch.push({
-          username: `user3_${id}`,
-          email: `user3_${id}@example.com`,
-          bio: 'y'.repeat(docSize), // filler to increase size
+          username: `user1_${id}`,
+          email: `user1_${id}@example.com`,
+          bio: 'x'.repeat(docSize), // filler to increase size
           createdAt: new Date(),
         });
       }
