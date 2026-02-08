@@ -209,7 +209,7 @@ services:
         --bind_ip_all \
         --port 27040
     volumes:
-      - ./keyfile:/mongo_keyfile
+      - ./keyfile:/keyfile
     network_mode: "host"
 
 
