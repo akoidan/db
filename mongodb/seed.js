@@ -1,12 +1,39 @@
 import { MongoClient } from 'mongodb';
 
 async function main() {
-  const uri = 'mongodb://localhost:27040/messaging-app';
+  const uri = 'mongodb://admin:password@localhost:27040/messaging-app?authSource=admin';
+
   const client = new MongoClient(uri);
 
   try {
     await client.connect();
     const db = client.db('messaging-app');
+
+
+
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map(c => c.name);
+
+    if (!collectionNames.includes('users')) {
+      await db.createCollection('users');
+      await db.admin().command({
+        shardCollection: 'messaging-app.users', // full namespace
+        key: { _id: 1 }                        // shard key
+      });
+      console.log('Created users collection');
+    }
+
+    if (!collectionNames.includes('messages')) {
+      const messages = await db.createCollection('messages');
+      console.log('Created messages collection');
+      await db.admin().command({
+        shardCollection: 'messaging-app.messages', // full namespace
+        key: { userId: 1 }                        // shard key
+      });
+      await messages.createIndex('userId');
+    }
+
+
     const users = db.collection('users');
 
     const bulkSize = 1_000; // number of docs per batch

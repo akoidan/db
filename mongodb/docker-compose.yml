@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb-rs0-p:
     image: mongo:6
@@ -224,9 +222,9 @@ services:
         HOST="localhost"
         PORTS=(28018 28019 28020)
         
-        for PORT in "${PORTS[@]}"; do
-          echo "Waiting for $HOST:$PORT..."
-          while ! nc -z "$HOST" "$PORT"; do
+        for PORT in "$${PORTS[@]}"; do
+          echo "Waiting for $$HOST:$$PORT..."
+          while ! mongosh --host $$HOST:$$PORT --eval "db.runCommand('ping')" --quiet 2>/dev/null; do
             sleep 1
           done
         done
@@ -241,14 +239,14 @@ services:
           ]
         })
         "
-
+        
         echo "set replica2"
         HOST="localhost"
         PORTS=(28021 28022 28023)
         
-        for PORT in "${PORTS[@]}"; do
-          echo "Waiting for $HOST:$PORT..."
-          while ! nc -z "$HOST" "$PORT"; do
+        for PORT in "$${PORTS[@]}"; do
+          echo "Waiting for $$HOST:$$PORT..."
+          while ! mongosh --host $$HOST:$$PORT --eval "db.runCommand('ping')" --quiet 2>/dev/null; do
             sleep 1
           done
         done
@@ -268,9 +266,9 @@ services:
         HOST="localhost"
         PORTS=(27030 27031 27032)
         
-        for PORT in "${PORTS[@]}"; do
-          echo "Waiting for $HOST:$PORT..."
-          while ! nc -z "$HOST" "$PORT"; do
+        for PORT in "$${PORTS[@]}"; do
+          echo "Waiting for $$HOST:$$PORT..."
+          while ! mongosh --host $$HOST:$$PORT --eval "db.runCommand('ping')" --quiet 2>/dev/null; do
             sleep 1
           done
         done
@@ -291,21 +289,21 @@ services:
         HOST="localhost"
         PORTS=(27040)
         
-        for PORT in "${PORTS[@]}"; do
-          echo "Waiting for $HOST:$PORT..."
-          while ! nc -z "$HOST" "$PORT"; do
+        for PORT in "$${PORTS[@]}"; do
+          echo "Waiting for $$HOST:$$PORT..."
+          while ! mongosh --host $$HOST:$$PORT --eval "db.runCommand('ping')" --quiet 2>/dev/null; do
             sleep 1
           done
         done
-
+        
         mongosh --host localhost:27040 --eval "
         sh.addShard('rs0/localhost:28018,localhost:28019,localhost:28020')
         sh.addShard('rs1/localhost:28021,localhost:28022,localhost:28023')
         "
         
         echo "set root mongos pasword"
-
-
+        
+        
         mongosh --host localhost:27040 --eval "
         db = db.getSiblingDB('admin');
 
