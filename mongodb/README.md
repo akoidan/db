@@ -15,11 +15,7 @@ docker-compose up
 # 1st RS
 
 ```bash
-mongosh --host localhost:28018
-```
-
-Execute:
-```js
+mongosh --host localhost:28018 --eval "
 rs.initiate({
   _id: 'rs0',
   members: [
@@ -28,17 +24,9 @@ rs.initiate({
     { _id: 2, host: 'localhost:28020', priority: 1 }
   ]
 })
-```
+"
 
-
-## 2nd RS
-
-```bash
-mongosh --host localhost:28021
-```
-
-Execute:
-```js
+mongosh --host localhost:28021 --eval "
 rs.initiate({
   _id: 'rs1',
   members: [
@@ -47,53 +35,38 @@ rs.initiate({
     { _id: 2, host: 'localhost:28023', priority: 1 }
   ]
 })
-```
-
-
-# Config dbs
-
-```bash
-mongosh --host localhost:27030
-```
-
-
-```js
+"
+mongosh --host localhost:27030 --eval "
 rs.initiate({
-  _id: "cfgRS",
+  _id: 'cfgRS',
   configsvr: true,
   members: [
-    { _id: 0, host: "localhost:27030" },
-    { _id: 1, host: "localhost:27031" },
-    { _id: 2, host: "localhost:27032" }
+    { _id: 0, host: 'localhost:27030' },
+    { _id: 1, host: 'localhost:27031' },
+    { _id: 2, host: 'localhost:27032' }
   ]
 })
-```
-```bash
-mongosh --port 27040
-````
+"
+
+mongosh --host localhost:27040 --eval "
+sh.addShard('rs0/localhost:28018,localhost:28019,localhost:28020')
+sh.addShard('rs1/localhost:28021,localhost:28022,localhost:28023')
+"
 
 
-```js
-sh.addShard("rs0/localhost:28018,localhost:28019,localhost:28020")
-sh.addShard("rs1/localhost:28021,localhost:28022,localhost:28023")
-
-use admin
+mongosh --host localhost:27040 --eval "
+db = db.getSiblingDB('admin');
 
 db.createUser({
-  user: "admin",
-  pwd: "password",
-  roles: ["root"]
+  user: 'admin',
+  pwd: 'password',
+  roles: ['root']
 })
+"
 
-```
-
-
-```bash
-mongosh --port 27040 -u admin -p password --authenticationDatabase admin
-
-
-> sh.enableSharding('messaging-app')
-
+mongosh --port 27040 -u admin -p password --authenticationDatabase admin --eval "
+ sh.enableSharding('messaging-app')
+"
 ```
 
 ```bash
