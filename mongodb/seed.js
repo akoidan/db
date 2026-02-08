@@ -1,9 +1,12 @@
 import { MongoClient } from 'mongodb';
+import {config} from 'dotenv';
+
 
 async function main() {
-  const uri = 'mongodb://admin:password@localhost:27040/messaging-app?authSource=admin';
 
-  const client = new MongoClient(uri);
+  config();
+
+  const client = new MongoClient(process.env.MONGODB_URI);
 
   try {
     await client.connect();
@@ -36,9 +39,9 @@ async function main() {
 
     const users = db.collection('users');
 
-    const bulkSize = 1_000; // number of docs per batch
-    const docSize = 10240; // ~1KB per doc
-    const totalDocs = 90_000_000; // roughly 70MB of data
+    const bulkSize = 1_000;
+    const docSize = 10240;
+    const totalDocs = 90_000_00;
 
     console.log('Inserting users...');
 

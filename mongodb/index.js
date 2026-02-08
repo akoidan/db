@@ -20,7 +20,11 @@ app.use(bodyParser());
 router.get('/', (ctx) => ctx.body = { message: 'API running' });
 
 router.get('/users', async (ctx) => {
-  ctx.body = await db.collection('users').find({}).toArray();
+  ctx.body = await db.collection('users')
+    .find({})
+    .skip(parseInt(ctx.query.skip) || 0)
+    .limit(parseInt(ctx.query.limit) || 100)
+    .toArray();
 });
 
 router.get('/users-with-messages', async (ctx) => {
@@ -33,7 +37,9 @@ router.get('/users-with-messages', async (ctx) => {
         as: 'messages'
       }
     }
-  ]).toArray();
+  ])   .skip(parseInt(ctx.query.skip) || 0)
+      .limit(parseInt(ctx.query.limit) || 100).
+      toArray();
   ctx.body = result;
 });
 
@@ -47,7 +53,11 @@ router.get('/users/:id/messages', async (ctx) => {
 });
 
 router.get('/messages', async (ctx) => {
-  ctx.body = await db.collection('messages').find({  }).toArray();
+  ctx.body = await db.collection('messages')
+      .find({})
+      .skip(parseInt(ctx.query.skip) || 0)
+      .limit(parseInt(ctx.query.limit) || 100)
+      .toArray();
 });
 
 router.post('/messages', async (ctx) => {
