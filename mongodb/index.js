@@ -22,6 +22,7 @@ router.get('/', (ctx) => ctx.body = { message: 'API running' });
 router.get('/users', async (ctx) => {
   ctx.body = await db.collection('users')
     .find({})
+    .sort({ _id: 1 })
     .skip(parseInt(ctx.query.skip) || 0)
     .limit(parseInt(ctx.query.limit) || 100)
     .toArray();
@@ -55,6 +56,7 @@ router.get('/users/:id/messages', async (ctx) => {
 router.get('/messages', async (ctx) => {
   ctx.body = await db.collection('messages')
       .find({})
+      .sort({ _id: 1 })
       .skip(parseInt(ctx.query.skip) || 0)
       .limit(parseInt(ctx.query.limit) || 100)
       .toArray();
