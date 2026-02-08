@@ -1,7 +1,7 @@
 # Postgres
 ## Characteristics
 - Structured Query Language (SQL)
-- USE when: Default choice on < 10k RPS.
+- Base line:  10k RPS, 200 connections (can be increased with infront proxy  PgBouncer)
 - ROW based storage (stores data in rows)
 - CAP: AC (Strong consistent. availability if Primary is reachable. On network partition connection returns errors)
 - SQL, performant join
@@ -58,6 +58,7 @@ Supports sharding out of the box. Uses [consistent hashing](https://en.wikipedia
 # MongoDB
 
 ## Characteristics
+- baseline: 10-50k connections, ram heavy 
 - MongoDB Query Language (MQL)
 - Document 
 - B tree indexs
@@ -70,7 +71,7 @@ Supports sharding out of the box. Uses [consistent hashing](https://en.wikipedia
 - High Available
 - Fault Tolerant
 - Support joins (join will have cortege times if no Index attached, but still work)
-- Typically handled up to 1k-50k connections. But heavy on RAM
+
 
 ## Profiling
 
@@ -113,6 +114,23 @@ Sharding start at 64MB of data by default.
  - support node query caching (lets say for 10k most search string it will cache result so they are blazingly fast)
 
 
+# Kafka
+- base line: one broken up to 1TB data and up to 10k messages
+- Properly choose partition key is important. Partition = shard
+- if partition key is ommited roudn robin used for sharding data
+- consumer api has retries
+- fault toulerant (replica), highly available (via partitioning replication)
+- append only readonly log
+- offset stored in kakfa, commit only when message processed
+- reliability: configurable ack Number (amount of aknowlege for writes). and replication factor (3 default)
+payload can be any size, but good practice under 1MB
+
+Topic: user-events
+Partitions: 1 (or more)
+Consumer group: user-service
+Instances: N
+
+
 
 # TIPS
 
@@ -121,7 +139,7 @@ Sharding start at 64MB of data by default.
 1) DEFAULT: B-tree (be-tree, not binary). Tree where each node is an array of pointers to a node. most popular. Since it's ordered supprots operations like
  - select * from a where a.b = 30; 
  - select * from a where a.b > 30; 
-2) INMEMORY: Hash index - usually used only in RAM store (like redis) since doesnt' support all operation and do not benefit from sequantial storage block
+2) INMEMORY: Hash index (also consider btree first) - usually used only in RAM store (like redis) since doesnt' support all operation and do not benefit from sequantial storage block
 3) LOCATION: Geospatial Indexes
 - Select * from location where lat > 100 and lat < 400 and long > 20 and long < 200
 3a) geohasing redis
@@ -151,6 +169,7 @@ MEMGRAPH
 TIMESCALE 
 COCKROACHDB
 SCylla
+zookeeper/consul
 
 
 ## How to migrate from 1 DB set to another
