@@ -221,7 +221,15 @@ services:
       - -c
       - |
         set -e 
-        sleep 10
+        HOST="localhost"
+        PORTS=(28018 28019 28020)
+        
+        for PORT in "${PORTS[@]}"; do
+          echo "Waiting for $HOST:$PORT..."
+          while ! nc -z "$HOST" "$PORT"; do
+            sleep 1
+          done
+        done
         echo "set replica1"
         mongosh --host localhost:28018 --eval "
         rs.initiate({
@@ -235,6 +243,16 @@ services:
         "
 
         echo "set replica2"
+        HOST="localhost"
+        PORTS=(28021 28022 28023)
+        
+        for PORT in "${PORTS[@]}"; do
+          echo "Waiting for $HOST:$PORT..."
+          while ! nc -z "$HOST" "$PORT"; do
+            sleep 1
+          done
+        done
+        
         mongosh --host localhost:28021 --eval "
         rs.initiate({
           _id: 'rs1',
@@ -246,7 +264,16 @@ services:
         })
         "
         
-        echo "set config shard configuration"
+        echo "set cfg"
+        HOST="localhost"
+        PORTS=(27030 27031 27032)
+        
+        for PORT in "${PORTS[@]}"; do
+          echo "Waiting for $HOST:$PORT..."
+          while ! nc -z "$HOST" "$PORT"; do
+            sleep 1
+          done
+        done
         
         mongosh --host localhost:27030 --eval "
         rs.initiate({
@@ -260,8 +287,16 @@ services:
         })
         "
         
-        sleep 20
-        echo "set Enable sharding"
+        echo "set sharding"
+        HOST="localhost"
+        PORTS=(27040)
+        
+        for PORT in "${PORTS[@]}"; do
+          echo "Waiting for $HOST:$PORT..."
+          while ! nc -z "$HOST" "$PORT"; do
+            sleep 1
+          done
+        done
 
         mongosh --host localhost:27040 --eval "
         sh.addShard('rs0/localhost:28018,localhost:28019,localhost:28020')
@@ -281,17 +316,11 @@ services:
         })
         "
         
-        echo "set nodes password"
-        
-        mongosh --host localhost:27040 --eval "
-        db = db.getSiblingDB('admin');
-
-        db.createUser({
-          user: 'admin',
-          pwd: 'password',
-          roles: ['root']
-        })
+        mongosh --port 27040 -u admin -p password --authenticationDatabase admin --eval "
+         sh.enableSharding('messaging-app')
         "
+        
+        echo "set nodes password"
         
         mongosh --host localhost:28018 --eval "
         db = db.getSiblingDB('admin');
@@ -352,12 +381,7 @@ services:
           roles: ['root']
         })
         "
-        
-        
 
-        mongosh --port 27040 -u admin -p password --authenticationDatabase admin --eval "
-         sh.enableSharding('messaging-app')
-        "
     volumes:
       - ./keyfile:/mongo_keyfile
     network_mode: "host"

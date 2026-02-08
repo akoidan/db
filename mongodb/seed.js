@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 
 async function main() {
-  const uri = 'mongodb://admin:password@localhost:27040/messaging-app?authSource=admin';
+  const uri = 'mongodb://localhost:27040/messaging-app';
   const client = new MongoClient(uri);
 
   try {
