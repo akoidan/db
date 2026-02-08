@@ -2,10 +2,6 @@ services:
   mongodb-rs0-p:
     image: mongo:6
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: admin
     entrypoint:
       - bash
       - -c
@@ -14,6 +10,16 @@ services:
           cp /keyfile /mongo_keyfile
           chmod 400 /mongo_keyfile
           chown 999:999 /mongo_keyfile
+        
+         mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 21018 --wiredTigerCacheSizeGB 2 --noauth --fork
+         mongosh "mongodb://127.0.0.1:21018/admin" --eval '
+            db.createUser({
+              user: "admin",
+              pwd: "password",
+              roles: ["root"]
+            })
+          '
+          mongosh "mongodb://127.0.0.1:21018/admin" --eval 'db.shutdownServer()'
         fi
         mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 28018 --wiredTigerCacheSizeGB 2
 
@@ -25,10 +31,6 @@ services:
   mongodb-rs0-s1:
     image: mongo:6
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: admin
     entrypoint:
       - bash
       - -c
@@ -47,10 +49,6 @@ services:
   mongodb-rs0-s2:
     image: mongo:6
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: admin
     entrypoint:
       - bash
       - -c
@@ -70,10 +68,6 @@ services:
   mongodb-rs1-p:
     image: mongo:6
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: admin
     entrypoint:
       - bash
       - -c
@@ -82,6 +76,15 @@ services:
           cp /keyfile /mongo_keyfile
           chmod 400 /mongo_keyfile
           chown 999:999 /mongo_keyfile
+          mongod --bind_ip_all --shardsvr --replSet rs0 --keyFile /mongo_keyfile --port 21019 --wiredTigerCacheSizeGB 2 --noauth --fork
+          mongosh "mongodb://127.0.0.1:21019/admin" --eval '
+             db.createUser({
+               user: "admin",
+               pwd: "password",
+               roles: ["root"]
+             })
+           '
+           mongosh "mongodb://127.0.0.1:21019/admin" --eval 'db.shutdownServer()'
         fi
         mongod --bind_ip_all --shardsvr --replSet rs1 --keyFile /mongo_keyfile --port 28021 --wiredTigerCacheSizeGB 2
     volumes:
@@ -92,10 +95,6 @@ services:
   mongodb-rs1-s1:
     image: mongo:6
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: admin
     entrypoint:
       - bash
       - -c
@@ -114,10 +113,6 @@ services:
   mongodb-rs1-s2:
     image: mongo:6
     restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: admin
     entrypoint:
       - bash
       - -c
