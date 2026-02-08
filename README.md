@@ -20,7 +20,7 @@ If faul tolerant required Patroni / repmgr / pg_auto_failover can be used. + etc
  - AWS RDS Psql - up to 5 read replicas. Doesnt support load balancing. Should be done manually with proxy or on a client side.
 
 ## Sharding
- - Doesn't support sharding. Sharding should be done at the application level manually.
+ - Doesn't support sharding. Can be done with Citus.
  
 ## profiling
 ```sql
@@ -121,9 +121,12 @@ Sharding start at 64MB of data by default.
 - consumer api has retries
 - fault toulerant (replica), highly available (via partitioning replication)
 - append only readonly log
+- doesnt support client retries. Manual hack -> put message into "retry" queue, and if it fails from there N time to deadLetterQueue (DLQ)
 - offset stored in kakfa, commit only when message processed
 - reliability: configurable ack Number (amount of aknowlege for writes). and replication factor (3 default)
+- retention policy (messages TTL) 7 days default. or 1GB log size
 payload can be any size, but good practice under 1MB
+performance tips: batch messages on producer. + we can compress
 
 Topic: user-events
 Partitions: 1 (or more)
